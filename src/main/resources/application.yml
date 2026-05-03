@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: shopFlow-user
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5433/userDb
+    username: user
+    password: 1234
+
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 20
+      max-idle-time: 30m
+      validation-query: SELECT 1
+
+jwt:
+    secret: "this-is-my-super-secret-key-for-jwt-token-generation-123456"
+    expiration.minutes: 60
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.example: DEBUG
