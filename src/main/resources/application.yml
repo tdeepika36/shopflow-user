@@ -1,11 +1,8 @@
 spring:
-  application:
-    name: shopFlow-user
-
-  r2dbc:
-    url: r2dbc:postgresql://localhost:5433/userDb
-    username: user
-    password: 1234
+   r2dbc:
+    url: ${R2DBC_URL_USER:r2dbc:postgresql://localhost:5432/shop-flow-local}
+    username: ${R2DBC_USERNAME:test}
+    password: ${R2DBC_PASSWORD:test}
 
     pool:
       enabled: true
@@ -15,10 +12,12 @@ spring:
       validation-query: SELECT 1
 
 jwt:
-    secret: "this-is-my-super-secret-key-for-jwt-token-generation-123456"
-    expiration.minutes: 60
+  secret: ${JWT_SECRET:this-is-my-super-secret-key-for-jwt-token-generation-123456}
+  expiration:
+    minutes: ${JWT_EXPIRATION_MINUTES:60}
+
 
 logging:
   level:
-    org.springframework.web: INFO
-    com.example: DEBUG
+    org.springframework.web: ${LOG_LEVEL_SPRING:INFO}
+    com.example: ${LOG_LEVEL_APP:DEBUG}

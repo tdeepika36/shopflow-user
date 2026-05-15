@@ -4,10 +4,16 @@ import com.example.shopflow_user.dto.*;
 import com.example.shopflow_user.model.Role;
 import com.example.shopflow_user.model.User;
 import com.example.shopflow_user.repository.UserRepository;
+import com.example.shopflow_user.security.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +21,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public Mono<UserResponse> register(RegisterRequest request) {
         return userRepository.existsByEmail(request.email())
@@ -26,6 +33,7 @@ public class AuthService {
                             .email(request.email())
                             .passwordHash(passwordEncoder.encode(request.password()))
                             .role(Role.CUSTOMER)
+                            .createdAt(Instant.now())
                             .build();
                     return userRepository.save(user);
                 })
@@ -57,6 +65,39 @@ public class AuthService {
                             jwtService.getExpirationSeconds()
                     ));
                 });
+    }
+
+    public Mono<Void> logout(ServerWebExchange exchange) {
+        String authHeader = exchange.getRequest()
+                .getHeaders()
+                .getFirst(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Mono.error(new BadCredentialsException("Missing Authorization header"));
+        }
+
+        String token = authHeader.substring(7);
+
+        if (!jwtService.isTokenValid(token)) {
+            return Mono.error(new BadCredentialsException("Invalid token"));
+        }
+
+        return tokenBlacklistService.blacklist(
+                token,
+                jwtService.extractExpiration(token)
+        );
+    }
+
+    public Mono<UserResponse> getUserById(String id) {
+        Long userId = Long.valueOf(id);
+        return userRepository.findById(userId)
+                .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
+                .map(user -> new UserResponse(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                ));
     }
 
 

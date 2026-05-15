@@ -50,6 +50,13 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+    public String extractEmail(String token) {
+        return parseClaims(token).getSubject();
+    }
+    public Instant extractExpiration(String token) {
+        return parseClaims(token).getExpiration().toInstant();
+    }
+
     public boolean isTokenValid(String token){
         try{
             Claims claims=parseClaims(token);
@@ -61,14 +68,7 @@ public class JwtService {
             return false;
         }
     }
-    public String extractEmail(String token){
-        return parseClaims(token).getSubject();
-    }
-    public String extractRole(String token){
-        return parseClaims(token).get("role",String.class);
-    }
-    public Long extractUserId(String token){
-        return parseClaims(token).get("userId",Long.class);
-    }
+
+
 
 }
