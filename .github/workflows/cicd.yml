@@ -54,7 +54,7 @@ jobs:
           name: docker-image
           path: /tmp/shopflow-user.tar
   imagetoecr:
-    needs: build
+    needs: dockerimage
     runs-on: ubuntu-latest
     steps:
       - name: get image
