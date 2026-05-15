@@ -51,7 +51,7 @@ jobs:
       - name: share tar file with next runner
         uses: actions/upload-artifact@v4
         with:
-          name: docker-image
+          name: shopflow-user
           path: /tmp/shopflow-user.tar
   imagetoecr:
     needs: dockerimage
