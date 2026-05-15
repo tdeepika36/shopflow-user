@@ -7,6 +7,8 @@ on:
 
 env:
   IMAGE_NAME : shopflow-user
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: user-service
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Get jar from previous runner
+      - name: Get jar from build
         uses: actions/download-artifact@v4
         with:
           name: shopflow-user
@@ -51,6 +53,31 @@ jobs:
         with:
           name: docker-image
           path: /tmp/shopflow-user.tar
+  imagetoecr:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: get image
+        uses: actions/download-artifact@v4
+        with:
+          name: shopflow-user
+          path: /tmp
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name : login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Tag and push
+        run: |
+          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+          docker tag ${{ env.IMAGE_NAME }}:latest $REGISTRY/${{ env.ECR_REPOSITORY }}:latest
+          docker push $REGISTRY/${{ env.ECR_REPOSITORY }}:latest
+
 
 
 
