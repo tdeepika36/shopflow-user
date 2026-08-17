@@ -1,0 +1,16 @@
+name: Application
+on:
+  workflow_run:
+    workflows: ["user-service"]
+    types:
+      - completed
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Deploy application
+        run: echo "Deploying artifacts..."
