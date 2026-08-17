@@ -53,33 +53,33 @@ jobs:
         with:
           name: shopflow-user
           path: /tmp/shopflow-user.tar
-  imagetoecr:
-    needs: dockerimage
-    runs-on: ubuntu-latest
-    steps:
-      - name: get image
-        uses: actions/download-artifact@v4
-        with:
-          name: shopflow-user
-          path: /tmp
-      - name: Load Docker image
-        run: docker load --input /tmp/shopflow-user.tar
-      - name: configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name : login to ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Tag and push
-        run: |
-          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
-          docker tag ${{ env.IMAGE_NAME }} $REGISTRY/${{ env.ECR_REPOSITORY }}
-          docker push $REGISTRY/${{ env.ECR_REPOSITORY }}
-
-
-
+#  imagetoecr:
+#    needs: dockerimage
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: get image
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: shopflow-user
+#          path: /tmp
+#      - name: Load Docker image
+#        run: docker load --input /tmp/shopflow-user.tar
+#      - name: configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          aws-region: ${{ env.AWS_REGION }}
+#      - name : login to ECR
+#        id: login-ecr
+#        uses: aws-actions/amazon-ecr-login@v2
+#
+#      - name: Tag and push
+#        run: |
+#          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+#          docker tag ${{ env.IMAGE_NAME }} $REGISTRY/${{ env.ECR_REPOSITORY }}
+#          docker push $REGISTRY/${{ env.ECR_REPOSITORY }}
+#
+#
+#
 
